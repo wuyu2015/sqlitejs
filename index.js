@@ -25,7 +25,7 @@ class Db {
                     case value instanceof Boolean:
                         return value.valueOf() ? 1 : 0;
                     case value instanceof Number:
-                        const num = value.valueOf()
+                        const num = value.valueOf();
                         return Number.isFinite(num) ? num : '';
                     case value instanceof BigInt:
                         return value.toString();
@@ -165,7 +165,7 @@ class Db {
         }
         const values = fields.map(field => Db.toSqlValue(object[field]));
         const fieldsStr = Db.getFieldString(fields);
-        const placeholder = Array(fields.length).fill('?').join(',')
+        const placeholder = Array(fields.length).fill('?').join(',');
         const sql = `INSERT INTO ${table} (${fieldsStr}) VALUES (${placeholder});`
         return new Promise((resolve, reject) => {
             this.db.run(sql, values, function (err) {
@@ -184,7 +184,7 @@ class Db {
     async commitInserts({chunkSize = 1000} = {}) {
         if (this._insertPaused) {
             for (const [table, tableObject] of this._insertMap) {
-                await this.inserts(table, tableObject.fields, tableObject.rowObjects, {chunkSize})
+                await this.inserts(table, tableObject.fields, tableObject.rowObjects, {chunkSize});
             }
             this._insertMap.clear();
             this._insertPaused = false;
@@ -202,8 +202,8 @@ class Db {
         page = 1,
     } = {}) {
         table = Db.identifier(table);
-        pk = Db.identifier(pk)
-        field = Db.identifier(field)
+        pk = Db.identifier(pk);
+        field = Db.identifier(field);
         const fieldsStr = field.length > 0 ? field : Db.getFieldString(fields);
         let sql;
         switch (true) {
@@ -228,28 +228,28 @@ class Db {
         const tableStr = Db.identifier(table);
         const placeholder = fields.map(field => {
             return `${Db.identifier(field)}=?`
-        }).join(',')
+        }).join(',');
         const sql = `UPDATE ${tableStr} SET ${placeholder} WHERE ${pk}=?;`
         const values = fields.map(field => Db.toSqlValue(object[field]));
-        values.push(Db.toSqlValue(id))
+        values.push(Db.toSqlValue(id));
         return new Promise((resolve, reject) => {
             this.db.run(sql, values, function (err) {
-                err ? reject(err) : resolve(this.changes)
-            })
-        })
+                err ? reject(err) : resolve(this.changes);
+            });
+        });
     }
 
     replace(table, fields, object) {
         const tableStr = Db.identifier(table);
         const fieldsStr = Db.getFieldString(fields);
-        const fieldsPlaceholder = Array(fields.length).fill('?').join(',')
+        const fieldsPlaceholder = Array(fields.length).fill('?').join(',');
         const sql = `INSERT OR REPLACE INTO ${tableStr} (${fieldsStr}) VALUES (${fieldsPlaceholder});`
         const values = fields.map(field => Db.toSqlValue(object[field]));
         return new Promise((resolve, reject) => {
             this.db.run(sql, values, function (err) {
-                err ? reject(err) : resolve(this.changes)
-            })
-        })
+                err ? reject(err) : resolve(this.changes);
+            });
+        });
     }
 
     delete(table, {pk, id} = {}) {
