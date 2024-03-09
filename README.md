@@ -77,13 +77,13 @@ Inserts a single row into a table, with an option to immediately execute or susp
 Executes a SELECT query on a table, with options for filtering, sorting, pagination, and specifying fields to return.
 
 ### `update(table, fields, object, {pk, id})`
-Updates rows in a table based on a condition, with options for specifying primary key and ID.
+Updates a row in a table based on the provided primary key and ID.
 
 ### `replace(table, fields, object)`
 Inserts a new row into a table or replaces an existing row if a unique constraint violation occurs.
 
 ### `delete(table, {pk, id})`
-Deletes rows from a table based on a condition, with options for specifying primary key and ID.
+Deletes a row from a table based on the provided primary key and ID.
 
 ### `count(table)`
 Counts the number of rows in a table.
@@ -99,9 +99,9 @@ Counts the number of rows in a table.
 - `suspendInsert()`: Suspends bulk insert operations.
 - `commitInserts({chunkSize})`: Commits the suspended inserts in batches.
 - `select({...options})`: Executes a SELECT query on the table.
-- `update(object, {id})`: Updates rows in the table.
+- `update(object, {id})`: Updates a row in the table based on the provided primary key value.
 - `replace(object)`: Inserts a new row into the table or replaces an existing row.
-- `delete({id})`: Deletes rows from the table.
+- `delete({id})`: Deletes a row from the table based on the provided primary key value.
 - `count()`: Counts the number of rows in the table.
 
 # Testing
