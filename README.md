@@ -1,7 +1,5 @@
 # sqlitejs
 
----
-
 A simple encapsulation for the npm package sqlite3([NPM](https://www.npmjs.com/package/sqlite3), [GitHub](https://github.com/TryGhost/node-sqlite3)), with additional implementation utilizing Promises for enhanced functionality.
 
 # Features
@@ -30,8 +28,8 @@ npm install @wu__yu/sqlite
 ```javascript
 import Db from '@wu__yu/sqlite';
 
-const db = new Db({file: 'test.db'});
-db.exec(`
+const db = new Db({file: 'demo.db'});
+await db.exec(`
     CREATE TABLE IF NOT EXISTS example_table (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT
@@ -40,13 +38,14 @@ db.exec(`
 // Suspend bulk insert operations
 db.suspendInsert();
 for (let i = 1; i <= 1000000; i++) {
-    // Loop to generate 100,000 rows of data
+    // Loop to generate 1,000,000 rows of data
     db.insert('example_table', ['name'], { name: `Entry ${i}` });
 }
 // Commit the suspended inserts in batches of 1000 rows each
 await db.commitInserts();
 // Done
-db.close();
+console.log(`total rows: ${await db.count('example_table')}`);
+await db.close();
 ```
 
 # API
