@@ -50,6 +50,8 @@ await db.close();
 
 # API
 
+## Db Class
+
 ### `exec(sql)`
 Executes a SQL statement.
 
@@ -85,6 +87,22 @@ Deletes rows from a table based on a condition, with options for specifying prim
 
 ### `count(table)`
 Counts the number of rows in a table.
+
+## Table Class
+
+### Constructor
+- `new Table(db, name, {pk, fields})`: Initializes a new Table object.
+
+### Methods
+- `inserts(objects, {chunkSize})`: Inserts multiple objects into the table.
+- `insert(object, {immediate})`: Inserts a single object into the table.
+- `suspendInsert()`: Suspends bulk insert operations.
+- `commitInserts({chunkSize})`: Commits the suspended inserts in batches.
+- `select({...options})`: Executes a SELECT query on the table.
+- `update(object, {id})`: Updates rows in the table.
+- `replace(object)`: Inserts a new row into the table or replaces an existing row.
+- `delete({id})`: Deletes rows from the table.
+- `count()`: Counts the number of rows in the table.
 
 # Testing
 
