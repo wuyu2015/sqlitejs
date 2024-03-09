@@ -1,6 +1,6 @@
 import { describe, it } from 'mocha';
 import { assert, expect } from 'chai';
-import Db from '../index.js';
+import { Db } from '../index.js';
 import fs from "fs";
 
 describe('Db', function() {

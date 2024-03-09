@@ -26,7 +26,7 @@ npm install @wu__yu/sqlite
 # Usage
 
 ```javascript
-import Db from '@wu__yu/sqlite';
+import { Db } from '@wu__yu/sqlite';
 
 const db = new Db({file: 'demo.db'});
 await db.exec(`

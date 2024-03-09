@@ -1,4 +1,4 @@
-import Db from "../index.js";
+import { Db } from "../index.js";
 
 const db = new Db({file: 'demo.db'});
 await db.exec(`
