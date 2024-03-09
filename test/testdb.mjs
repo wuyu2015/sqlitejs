@@ -8,6 +8,8 @@ describe('Db', function() {
         it('should quote timestamp correctly', function() {
             const t = Math.floor(new Date().getTime() / 1000);
             assert.equal(Db.timestamp(), t);
+            const t0 = 0;
+            assert.equal(Db.timestamp(new Date(0)), t0); // 1970-01-01 0:00:00
         });
     });
 
@@ -407,7 +409,7 @@ describe('Db', function() {
             const object = { name: 'David', age: 40 };
             const changes = await db.replace(table, fields, object);
             expect(changes).to.equal(1);
-            const insertedName = await db.select(table, {pk: 'id', id: 4, field: 'name'})
+            const insertedName = await db.select(table, {pk: 'id', id: 4, field: 'name'});
             expect(insertedName).to.equal('David');
         });
 
@@ -416,7 +418,7 @@ describe('Db', function() {
             const fields = ['id', 'name', 'age'];
             const changes = await db.replace(table, fields, { id: 2, name: 'David', age: 40 });
             expect(changes).to.equal(1);
-            const updatedName = await db.select(table, {pk: 'id', id: 2, field: 'name'})
+            const updatedName = await db.select(table, {pk: 'id', id: 2, field: 'name'});
             expect(updatedName).to.equal('David');
         });
     });
@@ -447,7 +449,7 @@ describe('Db', function() {
             const idToDelete = 2;
             const changes = await db.delete(table, { pk: 'id', id: idToDelete });
             expect(changes).to.equal(1);
-            const deletedRecord = await db.select(table, { pk: 'id', id: idToDelete })
+            const deletedRecord = await db.select(table, { pk: 'id', id: idToDelete });
             expect(deletedRecord).to.be.undefined;
         });
 
