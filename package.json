@@ -1,7 +1,7 @@
 {
   "name": "@wu__yu/sqlite",
   "private": false,
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A simple encapsulation for the npm package sqlite3, with additional implementation utilizing Promises for enhanced functionality.",
   "homepage": "https://github.com/wuyu2015/sqlitejs",
   "repository": {
