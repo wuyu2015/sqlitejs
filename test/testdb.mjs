@@ -190,6 +190,70 @@ describe('Db', function() {
         });
     });
 
+    describe('all()', () => {
+        let db;
+
+        before(() => {
+            db = new Db({ file: ':memory:' });
+            db.exec(`
+            CREATE TABLE IF NOT EXISTS test_table (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT
+            );
+        `);
+            db.exec(`
+            INSERT INTO test_table (name) VALUES ('Entry 1');
+            INSERT INTO test_table (name) VALUES ('Entry 2');
+            INSERT INTO test_table (name) VALUES ('Entry 3');
+        `);
+        });
+
+        it('should return an array containing only field', async () => {
+            const result = await db.all('SELECT name FROM test_table');
+            const expected = [{ name: 'Entry 1' }, { name: 'Entry 2' }, { name: 'Entry 3' }];
+            expect(result).to.deep.equal(expected);
+        });
+
+        it('should return an object with pk as keys and field as values', async () => {
+            const result = await db.all('SELECT id, name FROM test_table', { field: 'name', pk: 'id' });
+            const expected = { '1': 'Entry 1', '2': 'Entry 2', '3': 'Entry 3' };
+            expect(result).to.deep.equal(expected);
+        });
+
+        it('should return an object with pk as keys and row as values', async () => {
+            const result = await db.all('SELECT * FROM test_table', { pk: 'id' });
+            const expected = { '1': { id: 1, name: 'Entry 1' }, '2': { id: 2, name: 'Entry 2' }, '3': { id: 3, name: 'Entry 3' } };
+            expect(result).to.deep.equal(expected);
+        });
+
+        it('should return undefined if no rows match the query', async () => {
+            const result = await db.all('SELECT * FROM test_table WHERE id = 100');
+            expect(result).to.equal(undefined);
+        });
+
+        it('should return undefined if no rows match the query and field is specified', async () => {
+            const result = await db.all('SELECT * FROM test_table WHERE id = 100', { field: 'name' });
+            expect(result).to.equal(undefined);
+        });
+
+        it('should return undefined if no rows match the query and pk is specified', async () => {
+            const result = await db.all('SELECT * FROM test_table WHERE id = 100', { pk: 'id' });
+            expect(result).to.equal(undefined);
+        });
+
+        it('should return undefined if field or pk does not exist', async () => {
+            const result1 = await db.all('SELECT * FROM test_table', { field: 'invalid_field' });
+            expect(result1).to.equal(undefined);
+
+            const result2 = await db.all('SELECT * FROM test_table', { pk: 'invalid_pk' });
+            expect(result2).to.equal(undefined);
+        });
+
+        after(() => {
+            db.close();
+        });
+    });
+
     describe('inserts()', () => {
         let db;
 
@@ -337,6 +401,66 @@ describe('Db', function() {
             expect(result[0]).to.deep.equal({ id: 3, name: 'Charlie', age: 35 });
             expect(result[1]).to.deep.equal({ id: 1, name: 'Alice', age: 30 });
             expect(result[2]).to.deep.equal({ id: 2, name: 'Bob', age: 25 });
+        });
+    });
+
+    describe('select({pkAsRowKey})', () => {
+        let db;
+
+        before(async () => {
+            db = new Db({file: ':memory:'});
+            await db.exec(`
+                CREATE TABLE IF NOT EXISTS test_table (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT
+                );
+            `);
+            await db.insert('test_table', ['name'], {name: 'Entry 1'});
+            await db.insert('test_table', ['name'], {name: 'Entry 2'});
+            await db.insert('test_table', ['name'], {name: 'Entry 3'});
+        });
+
+        it('should return an object with pk as keys if pkAsRowKey is true', async () => {
+            const result = await db.select('test_table', {pk: 'id', pkAsRowKey: true});
+            expect(result).to.deep.equal({
+                1: {id: 1, name: 'Entry 1'},
+                2: {id: 2, name: 'Entry 2'},
+                3: {id: 3, name: 'Entry 3'}
+            });
+        });
+
+        it('should return an array of objects if pkAsRowKey is false or not specified', async () => {
+            const result1 = await db.select('test_table', {pk: 'id', pkAsRowKey: false});
+            expect(result1).to.deep.equal([
+                {id: 1, name: 'Entry 1'},
+                {id: 2, name: 'Entry 2'},
+                {id: 3, name: 'Entry 3'}
+            ]);
+
+            const result2 = await db.select('test_table', {pk: 'id'});
+            expect(result2).to.deep.equal([
+                {id: 1, name: 'Entry 1'},
+                {id: 2, name: 'Entry 2'},
+                {id: 3, name: 'Entry 3'}
+            ]);
+        });
+
+        it('should return the row with primary key as key and specified field when pkAsRowKey is true and field is specified', async () => {
+            const result3 = await db.select('test_table', { pk: 'id', pkAsRowKey: true, field: 'name', debug: true });
+            expect(result3).to.deep.equal({
+                1: 'Entry 1',
+                2: 'Entry 2',
+                3: 'Entry 3'
+            });
+        });
+
+        it('should return an array of specified fields when pkAsRowKey is false or not specified and field is specified', async () => {
+            const result4 = await db.select('test_table', { pk: 'id', field: 'name' });
+            expect(result4).to.deep.equal(['Entry 1', 'Entry 2', 'Entry 3']);
+        });
+
+        after(() => {
+            db.close();
         });
     });
 

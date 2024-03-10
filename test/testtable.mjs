@@ -129,6 +129,46 @@ describe('Table', () => {
         });
     });
 
+    describe('select({pkAsRowKey})', () => {
+        before(async () => {
+            await createTable();
+            await exampleTable.insert({ name: 'Entry 1' });
+            await exampleTable.insert({ name: 'Entry 2' });
+            await exampleTable.insert({ name: 'Entry 3' });
+        });
+
+        it('should return an object with primary key as keys and row as values when pkAsRowKey is true', async () => {
+            const result = await exampleTable.select({pkAsRowKey: true, debug: true});
+            expect(result).to.eql({
+                1: {id: 1, name: 'Entry 1'},
+                2: {id: 2, name: 'Entry 2'},
+                3: {id: 3, name: 'Entry 3'}
+            });
+        });
+
+        it('should return an object with primary key as keys and field as values when pkAsRowKey is true and field is specified', async () => {
+            const result = await exampleTable.select({field: 'name', pkAsRowKey: true});
+            expect(result).to.eql({1: 'Entry 1', 2: 'Entry 2', 3: 'Entry 3'});
+        });
+
+        it('should return an array containing only field when field is specified', async () => {
+            const result = await exampleTable.select({field: 'name'});
+            expect(result).to.eql(['Entry 1', 'Entry 2', 'Entry 3']);
+        });
+
+        it('should return all rows when pkAsRowKey is false', async () => {
+            const result = await exampleTable.select({pkAsRowKey: false});
+            expect(result).to.have.lengthOf(3);
+            expect(result[0]).to.eql({id: 1, name: 'Entry 1'});
+            expect(result[1]).to.eql({id: 2, name: 'Entry 2'});
+            expect(result[2]).to.eql({id: 3, name: 'Entry 3'});
+        });
+
+        after(async () => {
+            await closeTable();
+        });
+    });
+
     describe('update()', () => {
         before(createTable);
 

@@ -52,13 +52,16 @@ await db.close();
 
 ## Db Class
 
+###  `new Db({file, isVerbose})`
+Initializes a new Db object.
+
 ### `exec(sql)`
 Executes a SQL statement.
 
 ### `run(sql, {params})`
 Runs a SQL statement with optional parameters.
 
-### `all(sql, {params, field})`
+### `all(sql, {params, field, pk})`
 Runs a SQL query that retrieves all rows, with optional parameters and a specific field to return.
 
 ### `get(sql, {params, field})`
@@ -73,7 +76,7 @@ Inserts multiple rows into a table in a single operation, with an optional chunk
 ### `insert(table, fields, object, {immediate})`
 Inserts a single row into a table, with an option to immediately execute or suspend.
 
-### `select(table, {pk, id, fields, field, order, descending, limit, page})`
+### `select(table, {pk, pkAsRowKey, id, fields, field, order, descending, limit, page})`
 Executes a SELECT query on a table, with options for filtering, sorting, pagination, and specifying fields to return.
 
 ### `update(table, fields, object, {pk, id})`
