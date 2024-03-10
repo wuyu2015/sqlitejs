@@ -20,6 +20,36 @@ async function closeTable() {
 
 describe('Table', () => {
 
+    describe('Table Constructor', () => {
+        before(createTable);
+
+        it('should correctly initialize the Table object with primary key and fields', async () => {
+            const exampleTable = new Table(db, 'example_table', { pk: 'id', fields: ['name', 'age'] });
+            expect(exampleTable.db).to.equal(db);
+            expect(exampleTable.name).to.equal('example_table');
+            expect(exampleTable.pk).to.equal('id');
+            expect(exampleTable.fields).to.deep.equal(['name', 'age']);
+        });
+
+        it('should correctly initialize the Table object with primary key and fields excluding primary key', async () => {
+            const exampleTable = new Table(db, 'example_table', { pk: 'id', fields: ['id', 'name', 'age'] });
+            expect(exampleTable.db).to.equal(db);
+            expect(exampleTable.name).to.equal('example_table');
+            expect(exampleTable.pk).to.equal('id');
+            expect(exampleTable.fields).to.deep.equal(['name', 'age']);
+        });
+
+        it('should remove duplicate fields from the fields array', async () => {
+            const exampleTable = new Table(db, 'example_table', { pk: 'id', fields: ['id', 'name', 'name', 'age'] });
+            expect(exampleTable.db).to.equal(db);
+            expect(exampleTable.name).to.equal('example_table');
+            expect(exampleTable.pk).to.equal('id');
+            expect(exampleTable.fields).to.deep.equal(['name', 'age']);
+        });
+
+        after(closeTable);
+    });
+
     describe('inserts()', () => {
         before(createTable);
 
