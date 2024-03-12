@@ -228,25 +228,25 @@ describe('Db', function() {
 
         it('should return undefined if no rows match the query', async () => {
             const result = await db.all('SELECT * FROM test_table WHERE id = 100');
-            expect(result).to.equal(undefined);
+            expect(result).to.deep.equal([]);
         });
 
         it('should return undefined if no rows match the query and field is specified', async () => {
             const result = await db.all('SELECT * FROM test_table WHERE id = 100', { field: 'name' });
-            expect(result).to.equal(undefined);
+            expect(result).to.deep.equal([]);
         });
 
         it('should return undefined if no rows match the query and pk is specified', async () => {
             const result = await db.all('SELECT * FROM test_table WHERE id = 100', { pk: 'id' });
-            expect(result).to.equal(undefined);
+            expect(result).to.deep.equal([]);
         });
 
         it('should return undefined if field or pk does not exist', async () => {
             const result1 = await db.all('SELECT * FROM test_table', { field: 'invalid_field' });
-            expect(result1).to.equal(undefined);
+            expect(result1).to.deep.equal([]);
 
             const result2 = await db.all('SELECT * FROM test_table', { pk: 'invalid_pk' });
-            expect(result2).to.equal(undefined);
+            expect(result2).to.deep.equal([]);
         });
 
         after(() => {
