@@ -1,17 +1,47 @@
-import { expect } from 'chai';
+import { describe, it } from 'mocha';
+import { assert } from 'chai';
 import { Db, Table } from '../index.js';
 
 let db;
 let exampleTable;
+
+const objectsWithPk = [
+    {id: 1, name: 'Alice', age: 30, male: false, books: ['Book 1', 'Book 2', 'Book 3'], json: {a: 1, b: 2, c: 3}},
+    {id: 2, name: 'Bob', age: 25, male: true, books: ['Book 4'], json: {a: 4}},
+    {id: 3, name: 'Charlie', age: 35, male: true, books: ['Book 5', 'Book 6'], json: {d: 5}},
+    {id: 4, name: 'David', age: 40, male: true, books: [], json: {}},
+];
+
+const objects = [
+    {name: 'Alice', age: 30, male: false, books: ['Book 1', 'Book 2', 'Book 3'], json: {a: 1, b: 2, c: 3}},
+    {name: 'Bob', age: 25, male: true, books: ['Book 4'], json: {a: 4}},
+    {name: 'Charlie', age: 35, male: true, books: ['Book 5', 'Book 6'], json: {d: 5}},
+    {name: 'David', age: 40, male: true, books: [], json: {}},
+];
+
 async function createTable() {
-    db = new Db({file: ':memory:'});
+    db = new Db();
     await db.exec(`
         CREATE TABLE IF NOT EXISTS example_table (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT
+            name TEXT UNIQUE,
+            age INTEGER,
+            male INTEGER,
+            books TEXT,
+            json TEXT
         );
     `);
-    exampleTable = new Table(db, 'example_table', {pk: 'id', fields: ['name']});
+    exampleTable = new Table(db, 'example_table', {
+        id: 'int',
+        name: 'string',
+        age: 'int',
+        male: 'boolean',
+        books: 'array',
+        json: 'object',
+    }, {
+        pk: 'id',
+        uk: 'name',
+    });
 }
 
 async function closeTable() {
@@ -19,274 +49,168 @@ async function closeTable() {
 }
 
 describe('Table', () => {
-
     describe('Table Constructor', () => {
         before(createTable);
-
-        it('should correctly initialize the Table object with primary key and fields', async () => {
-            const exampleTable = new Table(db, 'example_table', { pk: 'id', fields: ['name', 'age'] });
-            expect(exampleTable.db).to.equal(db);
-            expect(exampleTable.name).to.equal('example_table');
-            expect(exampleTable.pk).to.equal('id');
-            expect(exampleTable.fields).to.deep.equal(['name', 'age']);
-        });
-
-        it('should correctly initialize the Table object with primary key and fields excluding primary key', async () => {
-            const exampleTable = new Table(db, 'example_table', { pk: 'id', fields: ['id', 'name', 'age'] });
-            expect(exampleTable.db).to.equal(db);
-            expect(exampleTable.name).to.equal('example_table');
-            expect(exampleTable.pk).to.equal('id');
-            expect(exampleTable.fields).to.deep.equal(['name', 'age']);
-        });
-
-        it('should remove duplicate fields from the fields array', async () => {
-            const exampleTable = new Table(db, 'example_table', { pk: 'id', fields: ['id', 'name', 'name', 'age'] });
-            expect(exampleTable.db).to.equal(db);
-            expect(exampleTable.name).to.equal('example_table');
-            expect(exampleTable.pk).to.equal('id');
-            expect(exampleTable.fields).to.deep.equal(['name', 'age']);
-        });
-
         after(closeTable);
+
+        it('should initialize', async () => {
+            assert.deepStrictEqual(exampleTable.fieldTypes, {
+                id: 'int',
+                name: 'string',
+                age: 'int',
+                male: 'boolean',
+                books: 'array',
+                json: 'object',
+            });
+            assert.deepStrictEqual(exampleTable.fieldsWithPk, ['id', 'name', 'age', 'male', 'books', 'json']);
+            assert.deepStrictEqual(exampleTable.fields, ['name', 'age', 'male', 'books', 'json']);
+            assert.deepStrictEqual(exampleTable.pk, 'id');
+            assert.deepStrictEqual(exampleTable.uk, 'name');
+        });
     });
 
     describe('inserts()', () => {
-        before(createTable);
+        beforeEach(createTable);
+        afterEach(closeTable);
 
-        it('should insert multiple objects into the table', async () => {
-            expect(await exampleTable.inserts([{ name: 'Entry 1' }, { name: 'Entry 2' }, { name: 'Entry 3' }])).to.equal(3);
+        it('should return number of rows', async () => {
+            assert.strictEqual(await exampleTable.inserts(objects), 4);
+            assert.deepStrictEqual(await exampleTable.selects(), objectsWithPk);
         });
 
-        after(closeTable);
+        it('should return number of rows 2', async () => {
+            const objects2 = [...objects];
+            objects2[0].someKey = 'someValue';
+            assert.strictEqual(await exampleTable.inserts(objects2), 4);
+            assert.deepStrictEqual(await exampleTable.selects(), objectsWithPk);
+        });
     });
 
     describe('insert()', () => {
-        before(createTable);
+        beforeEach(createTable);
+        afterEach(closeTable);
 
-        it('should insert a single object into the table', async () => {
-            expect(await exampleTable.insert({ name: 'Entry 1' })).to.equal(1);
-            expect(await exampleTable.insert({ name: 'Entry 2' })).to.equal(2);
-        });
-
-        it('should return 0 if object does not contain primary key value', async () => {
-            expect(await exampleTable.insert({ invalidField: 'Entry 1' })).to.equal(0);
-        });
-
-        it('should throw an error if primary key value already exists in the table', async () => {
+        it('should return lastID', async () => {
+            assert.strictEqual(await exampleTable.insert({ name: 'Entry 1' }), 1);
+            assert.strictEqual(await exampleTable.insert({ name: 'Entry 2' }), 2);
+            assert.strictEqual(await exampleTable.insert({}), 0);
+            assert.strictEqual(await exampleTable.insert({invalidField: 'Entry 1'}), 0);
             try {
-                await exampleTable.insert({ id: 1, name: 'Entry 1' });
-            } catch (error) {
-                expect(error).to.be.an.instanceOf(Error);
+                await exampleTable.insert({name: 'Entry 1'});
+                assert.fail('Expected an error to be thrown')
+            } catch (err) {
+                assert.include(err.message, 'UNIQUE');
             }
         });
-
-        after(closeTable);
     });
 
     describe('select()', () => {
-        it('should return the row matching the specified primary key value', async () => {
-            await createTable();
+        beforeEach(createTable);
+        afterEach(closeTable);
 
-            // Inserting some test data
-            await exampleTable.insert({ name: 'Entry 1' });
-            await exampleTable.insert({ name: 'Entry 2' });
-            await exampleTable.insert({ name: 'Entry 3' });
-
-            // Selecting row by primary key value
-            let row = await exampleTable.select({ id: 1 });
-            expect(row).to.deep.equal({ id: 1, name: 'Entry 1' });
-
-            // Selecting non-existent row by primary key value
-            row = await exampleTable.select({ id: 999 });
-            expect(row).to.be.undefined;
-
-            await closeTable();
-        });
-
-        it('should return an array of rows matching the specified criteria', async () => {
-            await createTable();
-
-            // Inserting some test data
-            await exampleTable.insert({ name: 'Entry 1' });
-            await exampleTable.insert({ name: 'Entry 2' });
-            await exampleTable.insert({ name: 'Entry 3' });
-
-            // Selecting rows without any criteria
-            let rows = await exampleTable.select();
-            expect(rows).to.have.lengthOf(3);
-            expect(rows[0]).to.deep.equal({ id: 1, name: 'Entry 1' });
-            expect(rows[1]).to.deep.equal({ id: 2, name: 'Entry 2' });
-            expect(rows[2]).to.deep.equal({ id: 3, name: 'Entry 3' });
-
-            // Selecting rows by other criteria
-            rows = await exampleTable.select({ fields: ['name'] });
-            expect(rows).to.have.lengthOf(3);
-            expect(rows[0]).to.deep.equal({ name: 'Entry 1' });
-            expect(rows[1]).to.deep.equal({ name: 'Entry 2' });
-            expect(rows[2]).to.deep.equal({ name: 'Entry 3' });
-
-            await closeTable();
+        it('should return a row', async () => {
+            await exampleTable.inserts(objects);
+            assert.deepStrictEqual(await exampleTable.select(), objectsWithPk[0]);
+            assert.deepStrictEqual(await exampleTable.select({pk: 1}), objectsWithPk[0]);
+            assert.deepStrictEqual(await exampleTable.select({pk: 2}), objectsWithPk[1]);
+            assert.deepStrictEqual(await exampleTable.select({pk: 2, resultField: 'name'}), objectsWithPk[1].name);
+            assert.deepStrictEqual(await exampleTable.select({pk: 2, resultField: 'age'}), objectsWithPk[1].age);
+            assert.deepStrictEqual(await exampleTable.select({pk: 2, resultField: 'male'}), objectsWithPk[1].male);
+            assert.deepStrictEqual(await exampleTable.select({pk: 2, resultField: 'books'}), objectsWithPk[1].books);
+            assert.deepStrictEqual(await exampleTable.select({pk: 2, resultField: 'json'}), objectsWithPk[1].json);
+            assert.deepStrictEqual(await exampleTable.select({uk: 'Bob'}), objectsWithPk[1]);
+            assert.deepStrictEqual(await exampleTable.select({where: [['age', 30, '<']]}), objectsWithPk[1]);
+            assert.deepStrictEqual(await exampleTable.select({where: [['age', 30, '<']], resultField: 'books'}), objectsWithPk[1].books);
         });
     });
 
-    describe('select({pkAsRowKey})', () => {
-        before(async () => {
-            await createTable();
-            await exampleTable.insert({ name: 'Entry 1' });
-            await exampleTable.insert({ name: 'Entry 2' });
-            await exampleTable.insert({ name: 'Entry 3' });
-        });
+    describe('selects()', () => {
+        beforeEach(createTable);
+        afterEach(closeTable);
 
-        it('should return an object with primary key as keys and row as values when pkAsRowKey is true', async () => {
-            const result = await exampleTable.select({pkAsRowKey: true, debug: true});
-            expect(result).to.eql({
-                1: {id: 1, name: 'Entry 1'},
-                2: {id: 2, name: 'Entry 2'},
-                3: {id: 3, name: 'Entry 3'}
-            });
-        });
-
-        it('should return an object with primary key as keys and field as values when pkAsRowKey is true and field is specified', async () => {
-            const result = await exampleTable.select({field: 'name', pkAsRowKey: true});
-            expect(result).to.eql({1: 'Entry 1', 2: 'Entry 2', 3: 'Entry 3'});
-        });
-
-        it('should return an array containing only field when field is specified', async () => {
-            const result = await exampleTable.select({field: 'name'});
-            expect(result).to.eql(['Entry 1', 'Entry 2', 'Entry 3']);
-        });
-
-        it('should return all rows when pkAsRowKey is false', async () => {
-            const result = await exampleTable.select({pkAsRowKey: false});
-            expect(result).to.have.lengthOf(3);
-            expect(result[0]).to.eql({id: 1, name: 'Entry 1'});
-            expect(result[1]).to.eql({id: 2, name: 'Entry 2'});
-            expect(result[2]).to.eql({id: 3, name: 'Entry 3'});
-        });
-
-        after(async () => {
-            await closeTable();
+        it('should return rows', async () => {
+            await exampleTable.inserts(objects);
+            assert.deepStrictEqual(await exampleTable.selects(), objectsWithPk);
+            const objectsMap = new Map();
+            objectsWithPk.forEach(row => objectsMap.set(row.id, row));
+            assert.deepStrictEqual(await exampleTable.selects({resultType: 'map', pkAsResultKey: true}), objectsMap);
+            const objectsObject = {};
+            objectsWithPk.forEach(row => objectsObject[row.id] = row);
+            assert.deepStrictEqual(await exampleTable.selects({resultType: 'object', pkAsResultKey: true}), objectsObject);
+            const objectsSet = new Set();
+            objectsWithPk.forEach(row => objectsSet.add(row.name));
+            assert.deepStrictEqual(await exampleTable.selects({resultType: 'set', resultField: 'name', pkAsResultKey: true}), objectsSet);
         });
     });
 
     describe('update()', () => {
-        before(createTable);
+        beforeEach(createTable);
+        afterEach(closeTable);
 
-        it('should update an existing row in the table', async () => {
-            // Inserting some test data
-            await exampleTable.insert({ name: 'Entry 1' });
-
-            // Updating an existing row
-            const result = await exampleTable.update({ id: 1, name: 'Updated Entry 1' });
-            expect(result).to.equal(1);
-
-            // Verifying the updated row
-            const updatedRow = await exampleTable.select({ id: 1 });
-            expect(updatedRow).to.deep.equal({ id: 1, name: 'Updated Entry 1' });
+        it('should update rows', async () => {
+            await exampleTable.inserts(objects);
+            assert.strictEqual(await exampleTable.update({name: 'Eric'}, {pk: 5}), 0);
+            assert.strictEqual(await exampleTable.update({name: 'Bill'}, {pk: 2}), 1);
+            assert.strictEqual(await exampleTable.select({pk: 2, resultField: 'name'}), 'Bill');
+            assert.strictEqual(await exampleTable.update({name: 'Bob'}, {where: [['name', 'Bill']]}), 1);
+            assert.strictEqual(await exampleTable.select({pk: 2, resultField: 'name'}), 'Bob');
+            assert.strictEqual(await exampleTable.update({male: false}, {where: [['male', true]]}), 3);
+            assert.deepStrictEqual(await exampleTable.selects({resultType: 'set', resultField: 'male'}), new Set([false]));
         });
-
-        it('should return 0 if trying to update a non-existent row', async () => {
-            // Trying to update a non-existent row
-            const result = await exampleTable.update({ id: 999, name: 'Non-existent Entry' });
-            expect(result).to.equal(0);
-        });
-
-        it('should return 0 if primary key value is not provided', async () => {
-            // Trying to update without providing primary key value
-            const result = await exampleTable.update({ name: 'New Entry' });
-            expect(result).to.equal(0);
-        });
-
-        it('should return 0 if provided primary key value does not exist in the table', async () => {
-            // Inserting some test data
-            await exampleTable.insert({ name: 'Entry 1' });
-
-            // Trying to update with a non-existent primary key value
-            const result = await exampleTable.update({ id: 999, name: 'Non-existent Entry' });
-            expect(result).to.equal(0);
-        });
-
-        after(closeTable);
     });
 
     describe('replace()', () => {
-        before(createTable);
+        beforeEach(createTable);
+        afterEach(closeTable);
 
-        it('should replace an existing row in the table', async () => {
-            // Inserting some test data
-            await exampleTable.insert({ name: 'Entry 1' });
-
-            // Replacing an existing row
-            await exampleTable.replace({ id: 1, name: 'Replaced Entry 1' });
-
-            // Verifying the replaced row
-            const replacedRow = await exampleTable.select({ id: 1 });
-            expect(replacedRow).to.deep.equal({ id: 1, name: 'Replaced Entry 1' });
+        it('should replace a row', async () => {
+            for (const row of objects) {
+                assert.strictEqual(await exampleTable.replace(row), 1);
+            }
+            assert.strictEqual(await exampleTable.count(), 4);
+            for (const row of objects) {
+                assert.strictEqual(await exampleTable.replace(row), 1);
+            }
+            assert.strictEqual(await exampleTable.count(), 4);
+            for (const row of objectsWithPk) {
+                assert.strictEqual(await exampleTable.replace(row), 1);
+            }
+            assert.strictEqual(await exampleTable.count(), 4);
+            assert.strictEqual(await exampleTable.replace({id: 2, name: 'Bob'}), 1);
+            assert.deepStrictEqual(await exampleTable.select({pk: 2}), {id: 2, name: 'Bob', age: NaN, male: false, books: [], json: {}});
         });
-
-        it('should insert a new row if the provided primary key value does not exist in the table', async () => {
-            // Replacing a non-existent row
-            await exampleTable.replace({ id: 999, name: 'New Entry' });
-
-            // Verifying the replaced row
-            const newEntry = await exampleTable.select({ id: 999 });
-            expect(newEntry).to.deep.equal({ id: 999, name: 'New Entry' });
-        });
-
-        after(closeTable);
     });
 
     describe('delete()', () => {
-        before(createTable);
+        beforeEach(createTable);
+        afterEach(closeTable);
 
-        it('should delete an existing row from the table', async () => {
-            // Inserting some test data
-            await exampleTable.insert({ name: 'Entry to be deleted' });
-
-            // Deleting an existing row
-            await exampleTable.delete({ id: 1 });
-
-            // Verifying the row has been deleted
-            const deletedRow = await exampleTable.select({ id: 1 });
-            expect(deletedRow).to.be.undefined;
+        it('should return the count of deleted rows', async () => {
+            assert.strictEqual(await exampleTable.delete({pk: 1}), 0);
+            await exampleTable.inserts(objects);
+            assert.strictEqual(await exampleTable.count(), 4);
+            assert.strictEqual(await exampleTable.delete({pk: 999}), 0);
+            assert.strictEqual(await exampleTable.delete({pk: 2}), 1);
+            assert.strictEqual(await exampleTable.count(), 3);
+            assert.strictEqual(await exampleTable.delete({pk: 2}), 0);
+            assert.strictEqual(await exampleTable.count(), 3);
+            assert.strictEqual(await exampleTable.delete({where: [['name', 'Bob']]}), 0);
+            assert.strictEqual(await exampleTable.count(), 3);
+            assert.strictEqual(await exampleTable.delete({where: [['name', 'David']]}), 1);
+            assert.strictEqual(await exampleTable.count(), 2);
+            assert.strictEqual(await exampleTable.delete({where: [['id', 1, '>']]}), 1);
+            assert.strictEqual(await exampleTable.count(), 1);
         });
-
-        it('should return 0 if trying to delete a non-existent row', async () => {
-            // Deleting a non-existent row
-            const result = await exampleTable.delete({ id: 999 });
-
-            // Verifying the result
-            expect(result).to.equal(0);
-        });
-
-        after(closeTable);
     });
 
     describe('count()', () => {
-        before(createTable);
+        beforeEach(createTable);
+        afterEach(closeTable);
 
-        it('should return the correct count of rows in the table', async () => {
-            // Inserting some test data
-            await exampleTable.inserts([{ name: 'Entry 1' }, { name: 'Entry 2' }, { name: 'Entry 3' }]);
-
-            // Getting the count of rows
-            const rowCount = await exampleTable.count();
-
-            // Verifying the count
-            expect(rowCount).to.equal(3);
+        it('should return the count of rows', async () => {
+            assert.strictEqual(await exampleTable.count(), 0);
+            await exampleTable.inserts(objects);
+            assert.strictEqual(await exampleTable.count(), 4);
         });
-
-        it('should return 0 if the table is empty', async () => {
-            // Deleting all rows from the table
-            await db.exec('DELETE FROM example_table');
-
-            // Getting the count of rows
-            const rowCount = await exampleTable.count();
-
-            // Verifying the count
-            expect(rowCount).to.equal(0);
-        });
-
-        after(closeTable);
     });
 });

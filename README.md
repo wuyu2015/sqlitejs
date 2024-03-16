@@ -1,6 +1,6 @@
 # sqlitejs
 
-A simple encapsulation for the npm package sqlite3([NPM](https://www.npmjs.com/package/sqlite3), [GitHub](https://github.com/TryGhost/node-sqlite3)), with additional implementation utilizing Promises for enhanced functionality.
+A simple encapsulation for the npm package sqlite3 ([NPM](https://www.npmjs.com/package/sqlite3), [GitHub](https://github.com/TryGhost/node-sqlite3)), with additional implementation utilizing Promises for enhanced functionality.
 
 # Features
 
@@ -28,7 +28,7 @@ npm install @wu__yu/sqlite
 ```javascript
 import { Db } from '@wu__yu/sqlite';
 
-const db = new Db({file: 'demo.db'});
+const db = new Db({ file: 'demo.db' });
 await db.exec(`
     CREATE TABLE IF NOT EXISTS example_table (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,7 +52,7 @@ await db.close();
 
 ## Db Class
 
-###  `new Db({file, isVerbose})`
+### `new Db({file, isVerbose})`
 Initializes a new Db object.
 
 ### `exec(sql)`
@@ -61,14 +61,14 @@ Executes a SQL statement.
 ### `run(sql, {params})`
 Runs a SQL statement with optional parameters.
 
-### `all(sql, {params, field, pk})`
-Runs a SQL query that retrieves all rows, with optional parameters and a specific field to return.
+### `all(sql, {params, resultType, resultKey, resultField, fieldTypes})`
+Runs a SQL query that retrieves all rows.
 
-### `get(sql, {params, field})`
-Runs a SQL query that retrieves a single row, with optional parameters and a specific field to return.
+### `get(sql, {params, resultField, fieldTypes})`
+Runs a SQL query that retrieves a single row.
 
 ### `each(sql, {params, fn})`
-Runs a SQL query and calls a function for each row returned, with optional parameters.
+Runs a SQL query and calls a function for each row returned.
 
 ### `inserts(table, fields, objects, {chunkSize})`
 Inserts multiple rows into a table in a single operation, with an optional chunk size for optimization.
@@ -76,17 +76,20 @@ Inserts multiple rows into a table in a single operation, with an optional chunk
 ### `insert(table, fields, object, {immediate})`
 Inserts a single row into a table, with an option to immediately execute or suspend.
 
-### `select(table, {pk, pkAsRowKey, id, fields, field, order, descending, limit, page})`
-Executes a SELECT query on a table, with options for filtering, sorting, pagination, and specifying fields to return.
+### `selects(table, {distinct, fields, where, order, descending, limit, page, resultType, resultKey, resultField, fieldTypes})`
+Selects rows on a table.
 
-### `update(table, fields, object, {pk, id})`
-Updates a row in a table based on the provided primary key and ID.
+### `select(table, {fields, where, resultField, fieldTypes})`
+Selects a row on a table.
+
+### `update(table, fields, object, {where})`
+Updates rows in a table.
 
 ### `replace(table, fields, object)`
-Inserts a new row into a table or replaces an existing row if a unique constraint violation occurs.
+Inserts a new row into a table or replaces an existing row.
 
-### `delete(table, {pk, id})`
-Deletes a row from a table based on the provided primary key and ID.
+### `delete(table, {where})`
+Delete rows from a table.
 
 ### `count(table)`
 Counts the number of rows in a table.
@@ -94,17 +97,18 @@ Counts the number of rows in a table.
 ## Table Class
 
 ### Constructor
-- `new Table(db, name, {pk, fields})`: Initializes a new Table object.
+- `new Table(db, name, fieldTypes, {pk, uk})`: Initializes a new Table object.
 
 ### Methods
 - `inserts(objects, {chunkSize})`: Inserts multiple objects into the table.
 - `insert(object, {immediate})`: Inserts a single object into the table.
 - `suspendInsert()`: Suspends bulk insert operations.
 - `commitInserts({chunkSize})`: Commits the suspended inserts in batches.
-- `select({...options})`: Executes a SELECT query on the table.
-- `update(object, {id})`: Updates a row in the table based on the provided primary key value.
+- `selects({distinct, fields, where, order, descending, limit, page, resultType, resultKey, resultField, pkAsResultKey, ukAsResultKey})`: Selects rows on the table.
+- `select({fields, pk, uk, where, resultField})`: Selects a row on the table.
+- `update(object, {where, pk})`: Updates rows in the table.
 - `replace(object)`: Inserts a new row into the table or replaces an existing row.
-- `delete({id})`: Deletes a row from the table based on the provided primary key value.
+- `delete({where, pk})`: Delete rows from the table.
 - `count()`: Counts the number of rows in the table.
 
 # Testing

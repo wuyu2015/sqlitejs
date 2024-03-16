@@ -130,3 +130,6 @@ dist
 
 # IDE
 .idea
+
+# others
+design.md
