@@ -254,14 +254,14 @@ describe('Db', function() {
             assert.deepStrictEqual(await db.all(sql, { resultType: 'object', resultKey: 'name', resultField: 'id' }), obj3);
         });
 
-        it("should return []|null", async () => {
+        it("should return empty data", async () => {
             const sql = `SELECT * FROM test_table WHERE id>3;`;
             assert.deepStrictEqual(await db.all(sql), []);
             assert.deepStrictEqual(await db.all(sql, { resultType: '' }), []);
             assert.deepStrictEqual(await db.all(sql, { resultType: 'array' }), []);
-            assert.strictEqual(await db.all(sql, { resultType: 'set' }), null);
-            assert.strictEqual(await db.all(sql, { resultType: 'map' }), null);
-            assert.strictEqual(await db.all(sql, { resultType: 'object' }), null);
+            assert.deepStrictEqual(await db.all(sql, { resultType: 'set' }), new Set());
+            assert.deepStrictEqual(await db.all(sql, { resultType: 'map' }), new Map());
+            assert.deepStrictEqual(await db.all(sql, { resultType: 'object' }), {});
         });
 
         it('should reject with an error', async () => {
