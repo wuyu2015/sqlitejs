@@ -104,6 +104,29 @@ describe('Table', () => {
         });
     });
 
+    describe('suspendInsert()', () => {
+        beforeEach(createTable);
+        afterEach(closeTable);
+
+        it('should return lastID', async () => {
+            assert.strictEqual(await exampleTable.lastId(), 0);
+            exampleTable.suspendInsert();
+            assert.strictEqual(await exampleTable.lastId(), 0);
+            assert.strictEqual(await exampleTable.insert({ name: 'Entry 1' }), 1);
+            assert.strictEqual(await exampleTable.lastId(), 0);
+            assert.strictEqual(await exampleTable.insert({}), 0);
+            assert.strictEqual(await exampleTable.lastId(), 0);
+            assert.strictEqual(await exampleTable.insert({invalidField: 'Entry 1'}), 0);
+            assert.strictEqual(await exampleTable.lastId(), 0);
+            assert.strictEqual(await exampleTable.insert({ name: 'Entry 2' }), 2);
+            assert.strictEqual(await exampleTable.lastId(), 0);
+            exampleTable.commitInserts();
+            assert.strictEqual(await exampleTable.lastId(), 2);
+            assert.strictEqual(await exampleTable.insert({ name: 'Entry 3' }), 3);
+            assert.strictEqual(await exampleTable.lastId(), 3);
+        });
+    });
+
     describe('select()', () => {
         beforeEach(createTable);
         afterEach(closeTable);
