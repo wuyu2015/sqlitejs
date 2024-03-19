@@ -495,6 +495,35 @@ describe('Db', function() {
         });
     });
 
+    describe('lastId()', () => {
+        let db;
+        const table = 'test_table';
+        const objects = [
+            {id: 1, name: 'Alice', age: 30, male: 0, books: ['Book 1', 'Book 2', 'Book 3']},
+            {id: 2, name: 'Bob', age: 25, male: 1, books: []},
+            {id: 3, name: 'Charlie', age: 35, male: 1, books: ['Book 4']},
+        ];
+
+        before(async () => {
+            db = new Db({});
+            await db.exec(`CREATE TABLE ${table} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, age INTEGER, male INTEGER, books TEXT);`);
+        });
+
+        afterEach(async () => {
+            await db.close();
+        });
+
+        it('should return last id', async () => {
+            assert.strictEqual(await db.lastId(table, 'id'), 0);
+            await db.insert(table, ['name', 'age', 'male', 'books'], objects[0]);
+            assert.strictEqual(await db.lastId(table, 'id'), 1);
+            await db.insert(table, ['name', 'age', 'male', 'books'], objects[1]);
+            assert.strictEqual(await db.lastId(table, 'id'), 2);
+            await db.insert(table, ['name', 'age', 'male', 'books'], objects[2]);
+            assert.strictEqual(await db.lastId(table, 'id'), 3);
+        });
+    });
+
     describe('update()', () => {
         let db;
         const table = 'test_table';

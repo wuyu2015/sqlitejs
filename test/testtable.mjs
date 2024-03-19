@@ -143,6 +143,21 @@ describe('Table', () => {
         });
     });
 
+    describe('lastId()', () => {
+        beforeEach(createTable);
+        afterEach(closeTable);
+
+        it('should return last id', async () => {
+            assert.strictEqual(await exampleTable.lastId(), 0);
+            await exampleTable.insert(objects[0]);
+            assert.strictEqual(await exampleTable.lastId(), 1);
+            await exampleTable.insert(objects[1]);
+            assert.strictEqual(await exampleTable.lastId(), 2);
+            await exampleTable.insert(objects[2]);
+            assert.strictEqual(await exampleTable.lastId(), 3);
+        });
+    });
+
     describe('update()', () => {
         beforeEach(createTable);
         afterEach(closeTable);
@@ -177,7 +192,7 @@ describe('Table', () => {
             }
             assert.strictEqual(await exampleTable.count(), 4);
             assert.strictEqual(await exampleTable.replace({id: 2, name: 'Bob'}), 1);
-            assert.deepStrictEqual(await exampleTable.select({pk: 2}), {id: 2, name: 'Bob', age: NaN, male: false, books: [], json: {}});
+            assert.deepStrictEqual(await exampleTable.select({pk: 2}), {id: 2, name: 'Bob', age: 0, male: false, books: [], json: {}});
         });
     });
 
