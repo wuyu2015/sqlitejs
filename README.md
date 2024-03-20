@@ -110,6 +110,18 @@ Counts the number of rows in a table.
 - `replace(object)`: Inserts a new row into the table or replaces an existing row.
 - `delete({where, pk})`: Delete rows from the table.
 - `count()`: Counts the number of rows in the table.
+- `selectsPk`: Retrieve the primary key values as an array.
+- `selectsPkSet`: Retrieve the primary key values as a Set.
+- `selectsUk`: Retrieve the unique key values as an array.
+- `selectsUkSet`: Retrieve the unique key values as a Set.
+- `selectsPkUk`: Retrieve the primary key and unique key values as an array.
+- `selectsPkUkMap`: Retrieve the primary key and unique key values as a Map (pk as key, uk as value).
+- `selectsPkUkObject`: Retrieve the primary key and unique key values as an Object (pk as key, uk as value).
+- `selectsUkPk`: Retrieve the unique key and primary key as an array.
+- `selectsUkPkMap`: Retrieve the unique key and primary key as a Map (uk as key, pk as value).
+- `selectsUkPkObject`: Retrieve the unique key and primary key as an Object. (uk as key, pk as value).
+- `selectByPk`: Retrieves a row from the table based on the provided primary key value.
+- `selectByUk`: Retrieves a row from the table based on the provided unique key value.
 
 # Testing
 
