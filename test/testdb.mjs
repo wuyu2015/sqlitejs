@@ -438,6 +438,7 @@ describe('Db', function() {
             } catch (err) {
                 assert.strictEqual(await db.count(table), 2);
             }
+            assert.deepStrictEqual(await db.insert(table, ['id', 'name', 'age'], { id: 2, name: 'Charlie', age: 35 }, {insertOrIgnore: true}), 2);
         });
 
         it('should handle inserting with suspended mode', async () => {
