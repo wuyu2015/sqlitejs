@@ -117,9 +117,10 @@ Counts the number of rows in a table.
 - `selectsPkUk`: Retrieve the primary key and unique key values as an array.
 - `selectsPkUkMap`: Retrieve the primary key and unique key values as a Map (pk as key, uk as value).
 - `selectsPkUkObject`: Retrieve the primary key and unique key values as an Object (pk as key, uk as value).
-- `selectsUkPk`: Retrieve the unique key and primary key as an array.
 - `selectsUkPkMap`: Retrieve the unique key and primary key as a Map (uk as key, pk as value).
 - `selectsUkPkObject`: Retrieve the unique key and primary key as an Object. (uk as key, pk as value).
+- `selectsUksPkMap`: Retrieve the unique keys and primary key as a nested Map (uks as keys, pk as value).
+- `selectsUksPkObject`: Retrieve the unique keys and primary key as a nested Object (uks as keys, pk as value).
 - `selectByPk`: Retrieves a row from the table based on the provided primary key value.
 - `selectByUk`: Retrieves a row from the table based on the provided unique key value.
 

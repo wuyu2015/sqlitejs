@@ -166,6 +166,54 @@ describe('Table', () => {
         });
     });
 
+    describe('selectsUksPkMap(), selectsUksPkObject()', () => {
+        before(async () => {
+            db = new Db();
+            await db.exec(`
+                CREATE TABLE IF NOT EXISTS example_table (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT,
+                    age INTEGER
+                );
+                CREATE UNIQUE INDEX IF NOT EXISTS "main"."example_table_name_age" ON "example_table" (name, age);
+            `);
+            exampleTable = new Table(db, 'example_table', {
+                id: 'int',
+                name: 'string',
+                age: 'int',
+            }, {
+                pk: 'id',
+                uks: ['name', 'age'],
+            });
+            await exampleTable.inserts([
+                {name: 'Alice', age: 30},
+                {name: 'Bob', age: 25},
+                {name: 'Bob', age: 30},
+                {name: 'Charlie', age: 35},
+                {name: 'David', age: 40},
+            ]);
+        });
+        after(closeTable);
+
+        it('should return a nested map', async () => {
+            assert.deepStrictEqual(await exampleTable.selectsUksPkMap(), new Map([
+                ['Alice', new Map([[30, 1]])],
+                ['Bob', new Map([[25, 2], [30, 3]])],
+                ['Charlie', new Map([[35, 4]])],
+                ['David', new Map([[40, 5]])],
+            ]));
+        });
+
+        it('should return a nested object', async () => {
+            assert.deepStrictEqual(await exampleTable.selectsUksPkObject(), {
+                Alice: {30: 1},
+                Bob: {25: 2, 30: 3},
+                Charlie: {35: 4},
+                David: {40: 5},
+            });
+        });
+    });
+
     describe('lastId()', () => {
         beforeEach(createTable);
         afterEach(closeTable);
