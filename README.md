@@ -104,12 +104,10 @@ Counts the number of rows in a table.
 - `insert(object, {immediate})`: Inserts a single object into the table.
 - `suspendInsert()`: Suspends bulk insert operations.
 - `commitInserts({chunkSize})`: Commits the suspended inserts in batches.
-- `selects({distinct, fields, where, order, descending, limit, page, resultType, resultKey, resultField, pkAsResultKey, ukAsResultKey})`: Selects rows on the table.
 - `select({fields, pk, uk, where, resultField})`: Selects a row on the table.
-- `update(object, {where, pk})`: Updates rows in the table.
-- `replace(object)`: Inserts a new row into the table or replaces an existing row.
-- `delete({where, pk})`: Delete rows from the table.
-- `count()`: Counts the number of rows in the table.
+- `selectByPk`: Retrieves a row from the table based on the provided primary key value.
+- `selectByUk`: Retrieves a row from the table based on the provided unique key value.
+- `selects({distinct, fields, where, order, descending, limit, page, resultType, resultKey, resultField, pkAsResultKey, ukAsResultKey})`: Selects rows on the table.
 - `selectsPk`: Retrieve the primary key values as an array.
 - `selectsPkSet`: Retrieve the primary key values as a Set.
 - `selectsUk`: Retrieve the unique key values as an array.
@@ -121,8 +119,15 @@ Counts the number of rows in a table.
 - `selectsUkPkObject`: Retrieve the unique key and primary key as an Object. (uk as key, pk as value).
 - `selectsUksPkMap`: Retrieve the unique keys and primary key as a nested Map (uks as keys, pk as value).
 - `selectsUksPkObject`: Retrieve the unique keys and primary key as a nested Object (uks as keys, pk as value).
-- `selectByPk`: Retrieves a row from the table based on the provided primary key value.
-- `selectByUk`: Retrieves a row from the table based on the provided unique key value.
+- `update(object, {where, pk})`: Updates rows in the table.
+- `replace(object)`: Inserts a new row into the table or replaces an existing row.
+- `delete({where, pk})`: Delete rows from the table.
+- `deleteByPk(pk)`: Delete a row from the table based on the provided primary key value.
+- `softDelete({where, pk})`: Soft delete rows from the table.
+- `softDeleteByPk(pk)`: Soft delete a row from the table based on the provided primary key value.
+- `unDelete({where, pk})`: Undelete rows from the table.
+- `unDeleteByPk(pk)`: Undelete a row from the table based on the provided primary key value.
+- `count()`: Counts the number of rows in the table.
 
 # Testing
 
