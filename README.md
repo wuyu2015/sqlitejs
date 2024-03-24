@@ -97,7 +97,7 @@ Counts the number of rows in a table.
 ## Table Class
 
 ### Constructor
-- `new Table(db, name, fieldTypes, {pk, uk})`: Initializes a new Table object.
+- `new Table(db, name, fieldTypes, {pk, uk, k, createdTimeField, updatedTimeField, deletedTimeField})`: Initializes a new Table object.
 
 ### Methods
 - `inserts(objects, {chunkSize})`: Inserts multiple objects into the table.
@@ -109,16 +109,31 @@ Counts the number of rows in a table.
 - `selectByUk`: Retrieves a row from the table based on the provided unique key value.
 - `selects({distinct, fields, where, order, descending, limit, page, resultType, resultKey, resultField, pkAsResultKey, ukAsResultKey})`: Selects rows on the table.
 - `selectsPk`: Retrieve the primary key values as an array.
-- `selectsPkSet`: Retrieve the primary key values as a Set.
 - `selectsUk`: Retrieve the unique key values as an array.
-- `selectsUkSet`: Retrieve the unique key values as a Set.
+- `selectsUks`: Retrieve the unique keys values as an array.
+- `selectsK`: Retrieve the content values as an array.
 - `selectsPkUk`: Retrieve the primary key and unique key values as an array.
+- `selectsPkUks`: Retrieve the primary key and unique keys values as an array.
+- `selectsPkK`: Retrieve the primary key and content values as an array.
+- `selectsUkK`: Retrieve the unique key and content values as an array.
+- `selectsUksK`: Retrieve the unique keys and content values as an array.
+- `selectsPkUkK`: Retrieve the primary key and unique key and content values as an array.
+- `selectsPkUksK`: Retrieve the primary key and unique keys and content values as an array.
+- `selectsPkSet`: Retrieve the primary key values as a Set.
+- `selectsUkSet`: Retrieve the unique key values as a Set.
+- `selectsKSet`: Retrieve the content values as a Set.
 - `selectsPkUkMap`: Retrieve the primary key and unique key values as a Map (pk as key, uk as value).
-- `selectsPkUkObject`: Retrieve the primary key and unique key values as an Object (pk as key, uk as value).
+- `selectsPkKMap`: Retrieve the primary key and content values as a Map (pk as key, content as value).
 - `selectsUkPkMap`: Retrieve the unique key and primary key as a Map (uk as key, pk as value).
-- `selectsUkPkObject`: Retrieve the unique key and primary key as an Object. (uk as key, pk as value).
+- `selectsUkKMap`: Retrieve the unique key and content as a Map (uk as key, content as value).
 - `selectsUksPkMap`: Retrieve the unique keys and primary key as a nested Map (uks as keys, pk as value).
+- `selectsUksKMap`: Retrieve the unique keys and content as a nested Map (uks as keys, content as value).
+- `selectsPkUkObject`: Retrieve the primary key and unique key values as an Object (pk as key, uk as value).
+- `selectsPkKObject`: Retrieve the primary key and content values as an Object (pk as key, content as value).
+- `selectsUkPkObject`: Retrieve the unique key and primary key as an Object. (uk as key, pk as value).
+- `selectsUkKObject`: Retrieve the unique key and content as an Object. (uk as key, content as value).
 - `selectsUksPkObject`: Retrieve the unique keys and primary key as a nested Object (uks as keys, pk as value).
+- `selectsUksKObject`: Retrieve the unique keys and content as a nested Object (uks as keys, content as value).
 - `update(object, {where, pk})`: Updates rows in the table.
 - `replace(object)`: Inserts a new row into the table or replaces an existing row.
 - `delete({where, pk})`: Delete rows from the table.
