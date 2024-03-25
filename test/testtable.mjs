@@ -299,4 +299,14 @@ describe('Table', () => {
             assert.strictEqual(await exampleTable.count(), 4);
         });
     });
+
+    describe('Table.getTimeFieldTypes()', () => {
+        it('should return time field types object', () => {
+            assert.deepStrictEqual(Table.getTimeFieldTypes(), {
+                created_at: 'int',
+                updated_at: 'int',
+                deleted_at: 'int',
+            });
+        });
+    });
 });
