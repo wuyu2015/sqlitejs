@@ -309,4 +309,44 @@ describe('Table', () => {
             });
         });
     });
+
+    describe('getFieldDef()', () => {
+        let table;
+
+        before(() => {
+            table = new Table(db, 'example_table', {
+                id: 'int',
+                name: 'string',
+                age: 'int',
+                male: 'boolean',
+                books: 'array',
+                json: 'object',
+            }, {
+                pk: 'id',
+                uk: 'name',
+            });
+        });
+
+        it('should return field def', () => {
+            assert.deepStrictEqual(table.getPkFieldDef(), '"id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT');
+            assert.deepStrictEqual(table.getPkFieldDef({autoIncrement: false}), '"id" INTEGER NOT NULL PRIMARY KEY');
+            assert.deepStrictEqual(table.getPkFieldDef({collate: 'BINARY', autoIncrement: false}), '"id" INTEGER NOT NULL PRIMARY KEY');
+            assert.deepStrictEqual(table.getUkFieldDef(), '"name" TEXT NOT NULL');
+            assert.deepStrictEqual(table.getUkFieldDef({collate: 'binary'}), '"name" TEXT NOT NULL COLLATE BINARY');
+            assert.deepStrictEqual(table.getFieldDef('age'), '"age" INTEGER NOT NULL');
+            assert.deepStrictEqual(table.getFieldDef('age', {defaultValue: 0}), '"age" INTEGER NOT NULL DEFAULT 0');
+            assert.deepStrictEqual(table.getFieldDef('age', {defaultValue: 20}), '"age" INTEGER NOT NULL DEFAULT 20');
+            assert.deepStrictEqual(table.getFieldDef('age', {defaultValue: ''}), `"age" INTEGER NOT NULL DEFAULT ''`);
+            assert.deepStrictEqual(table.getFieldDef('age', {defaultValue: -1}), '"age" INTEGER NOT NULL DEFAULT -1');
+            assert.deepStrictEqual(table.getFieldDef('male'), '"male" INTEGER NOT NULL');
+            assert.deepStrictEqual(table.getFieldDef('male', {defaultValue: true}), '"male" INTEGER NOT NULL DEFAULT 1');
+            assert.deepStrictEqual(table.getFieldDef('male', {defaultValue: false}), '"male" INTEGER NOT NULL DEFAULT 0');
+            assert.deepStrictEqual(table.getFieldDef('books'), `"books" TEXT NOT NULL`);
+            assert.deepStrictEqual(table.getFieldDef('books', {defaultValue: []}), `"books" TEXT NOT NULL DEFAULT ''`);
+            assert.deepStrictEqual(table.getFieldDef('books', {defaultValue: ['a', 'b', 'c']}), `"books" TEXT NOT NULL DEFAULT '["a","b","c"]'`);
+            assert.deepStrictEqual(table.getFieldDef('json'), `"json" TEXT NOT NULL`);
+            assert.deepStrictEqual(table.getFieldDef('json', {defaultValue: {}}), `"json" TEXT NOT NULL DEFAULT ''`);
+            assert.deepStrictEqual(table.getFieldDef('json', {defaultValue: {a: 1, b: 2, c: 3}}), `"json" TEXT NOT NULL DEFAULT '{"a":1,"b":2,"c":3}'`);
+        });
+    });
 });

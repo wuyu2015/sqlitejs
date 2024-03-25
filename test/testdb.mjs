@@ -652,4 +652,91 @@ describe('Db', function() {
             }
         });
     });
+
+    describe('getFieldDef()', () => {
+        it('should return text field definition', async () => {
+            assert.strictEqual(Db.getFieldDef('name', 'string'), '"name" TEXT NOT NULL');
+            assert.strictEqual(Db.getFieldDef('name', 'string', {
+                notNull: true,
+            }), '"name" TEXT NOT NULL');
+            assert.strictEqual(Db.getFieldDef('name', 'string', {
+                notNull: false,
+            }), '"name" TEXT');
+            assert.strictEqual(Db.getFieldDef('name', 'string', {
+                defaultValue: 'unknown',
+            }), `"name" TEXT NOT NULL DEFAULT 'unknown'`);
+            assert.strictEqual(Db.getFieldDef('name', 'string', {
+                defaultValue: '',
+            }), `"name" TEXT NOT NULL DEFAULT ''`);
+            assert.strictEqual(Db.getFieldDef('name', 'string', {
+                collate: 'binary',
+            }), `"name" TEXT NOT NULL COLLATE BINARY`);
+            assert.strictEqual(Db.getFieldDef('name', 'string', {
+                pk: true,
+            }), `"name" TEXT NOT NULL PRIMARY KEY`);
+            assert.strictEqual(Db.getFieldDef('name', 'string', {
+                autoIncrement: true,
+            }), `"name" TEXT NOT NULL`);
+            assert.strictEqual(Db.getFieldDef('name', 'string', {
+                pk: true,
+                autoIncrement: true,
+            }), `"name" TEXT NOT NULL PRIMARY KEY`);
+            assert.strictEqual(Db.getFieldDef('name', 'string', {
+                notNull: false,
+                defaultValue: 'unknown',
+                collate: 'binary',
+                pk: true,
+                autoIncrement: true,
+            }), `"name" TEXT NOT NULL COLLATE BINARY PRIMARY KEY`);
+        });
+
+        it('should return integer field definition', async () => {
+            assert.strictEqual(Db.getFieldDef('age', 'int'), '"age" INTEGER NOT NULL');
+            assert.strictEqual(Db.getFieldDef('age', 'int', {
+                notNull: true,
+            }), '"age" INTEGER NOT NULL');
+            assert.strictEqual(Db.getFieldDef('age', 'int', {
+                notNull: false,
+            }), '"age" INTEGER');
+            assert.strictEqual(Db.getFieldDef('age', 'int', {
+                defaultValue: 'unknown',
+            }), `"age" INTEGER NOT NULL DEFAULT 'unknown'`);
+            assert.strictEqual(Db.getFieldDef('age', 'int', {
+                defaultValue: 0,
+            }), `"age" INTEGER NOT NULL DEFAULT 0`);
+            assert.strictEqual(Db.getFieldDef('age', 'int', {
+                defaultValue: '',
+            }), `"age" INTEGER NOT NULL DEFAULT ''`);
+            assert.strictEqual(Db.getFieldDef('age', 'int', {
+                collate: 'binary',
+            }), `"age" INTEGER NOT NULL`);
+            assert.strictEqual(Db.getFieldDef('age', 'int', {
+                pk: true,
+            }), `"age" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT`);
+            assert.strictEqual(Db.getFieldDef('age', 'int', {
+                autoIncrement: true,
+            }), `"age" INTEGER NOT NULL`);
+            assert.strictEqual(Db.getFieldDef('age', 'int', {
+                pk: true,
+                autoIncrement: true,
+            }), `"age" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT`);
+            assert.strictEqual(Db.getFieldDef('age', 'int', {
+                pk: true,
+                autoIncrement: false,
+            }), `"age" INTEGER NOT NULL PRIMARY KEY`);
+            assert.strictEqual(Db.getFieldDef('age', 'int', {
+                notNull: false,
+                defaultValue: 'unknown',
+                collate: 'binary',
+                pk: true,
+            }), `"age" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT`);
+            assert.strictEqual(Db.getFieldDef('age', 'int', {
+                notNull: false,
+                defaultValue: 'unknown',
+                collate: 'binary',
+                pk: true,
+                autoIncrement: false,
+            }), `"age" INTEGER NOT NULL PRIMARY KEY`);
+        });
+    });
 });
