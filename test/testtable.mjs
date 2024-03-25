@@ -331,8 +331,10 @@ describe('Table', () => {
             assert.deepStrictEqual(table.getPkFieldDef(), '"id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT');
             assert.deepStrictEqual(table.getPkFieldDef({autoIncrement: false}), '"id" INTEGER NOT NULL PRIMARY KEY');
             assert.deepStrictEqual(table.getPkFieldDef({collate: 'BINARY', autoIncrement: false}), '"id" INTEGER NOT NULL PRIMARY KEY');
+            assert.deepStrictEqual(table.getPkFieldDef({collate: 'BINARY', onConflict: 'ignore', autoIncrement: false}), '"id" INTEGER NOT NULL ON CONFLICT IGNORE PRIMARY KEY');
             assert.deepStrictEqual(table.getUkFieldDef(), '"name" TEXT NOT NULL');
             assert.deepStrictEqual(table.getUkFieldDef({collate: 'binary'}), '"name" TEXT NOT NULL COLLATE BINARY');
+            assert.deepStrictEqual(table.getUkFieldDef({onConflict: 'ignore'}), '"name" TEXT NOT NULL ON CONFLICT IGNORE');
             assert.deepStrictEqual(table.getFieldDef('age'), '"age" INTEGER NOT NULL');
             assert.deepStrictEqual(table.getFieldDef('age', {defaultValue: 0}), '"age" INTEGER NOT NULL DEFAULT 0');
             assert.deepStrictEqual(table.getFieldDef('age', {defaultValue: 20}), '"age" INTEGER NOT NULL DEFAULT 20');

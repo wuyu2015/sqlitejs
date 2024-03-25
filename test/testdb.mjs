@@ -688,6 +688,14 @@ describe('Db', function() {
                 pk: true,
                 autoIncrement: true,
             }), `"name" TEXT NOT NULL COLLATE BINARY PRIMARY KEY`);
+            assert.strictEqual(Db.getFieldDef('name', 'string', {
+                notNull: false,
+                defaultValue: 'unknown',
+                collate: 'binary',
+                onConflict: 'ignore',
+                pk: true,
+                autoIncrement: true,
+            }), `"name" TEXT NOT NULL COLLATE BINARY ON CONFLICT IGNORE PRIMARY KEY`);
         });
 
         it('should return integer field definition', async () => {
@@ -737,6 +745,14 @@ describe('Db', function() {
                 pk: true,
                 autoIncrement: false,
             }), `"age" INTEGER NOT NULL PRIMARY KEY`);
+            assert.strictEqual(Db.getFieldDef('age', 'int', {
+                notNull: false,
+                defaultValue: 'unknown',
+                collate: 'binary',
+                onConflict: 'ignore',
+                pk: true,
+                autoIncrement: false,
+            }), `"age" INTEGER NOT NULL ON CONFLICT IGNORE PRIMARY KEY`);
         });
     });
 });
