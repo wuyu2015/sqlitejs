@@ -310,7 +310,7 @@ describe('Table', () => {
         });
     });
 
-    describe('getFieldDef()', () => {
+    describe('getFieldDef(), getTableDef()', () => {
         let table;
 
         before(() => {
@@ -349,6 +349,43 @@ describe('Table', () => {
             assert.deepStrictEqual(table.getFieldDef('json'), `"json" TEXT NOT NULL`);
             assert.deepStrictEqual(table.getFieldDef('json', {defaultValue: {}}), `"json" TEXT NOT NULL DEFAULT ''`);
             assert.deepStrictEqual(table.getFieldDef('json', {defaultValue: {a: 1, b: 2, c: 3}}), `"json" TEXT NOT NULL DEFAULT '{"a":1,"b":2,"c":3}'`);
+        });
+
+        it('should return table def', () => {
+            assert.strictEqual(table.getTableDef(), `CREATE TABLE IF NOT EXISTS "example_table" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "name" TEXT NOT NULL,
+  "age" INTEGER NOT NULL,
+  "male" INTEGER NOT NULL,
+  "books" TEXT NOT NULL,
+  "json" TEXT NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "main"."example_table_name" ON "example_table" (name);`);
+            assert.strictEqual(table.getCreateTableSql(), `CREATE TABLE IF NOT EXISTS "example_table" (
+  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  "name" TEXT NOT NULL,
+  "age" INTEGER NOT NULL,
+  "male" INTEGER NOT NULL,
+  "books" TEXT NOT NULL,
+  "json" TEXT NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "main"."example_table_name" ON "example_table" (name);`);
+            assert.strictEqual(table.getTableDef({
+                id: {onConflict: 'ignore'},
+                name: {onConflict: 'ignore', collate: 'noCase'},
+                age: {defaultValue: 0},
+                male: {defaultValue: true},
+                books: {defaultValue: []},
+                json: {defaultValue: {}},
+            }), `CREATE TABLE IF NOT EXISTS "example_table" (
+  "id" INTEGER NOT NULL ON CONFLICT IGNORE PRIMARY KEY AUTOINCREMENT,
+  "name" TEXT NOT NULL COLLATE NOCASE ON CONFLICT IGNORE,
+  "age" INTEGER NOT NULL DEFAULT 0,
+  "male" INTEGER NOT NULL DEFAULT 1,
+  "books" TEXT NOT NULL DEFAULT '',
+  "json" TEXT NOT NULL DEFAULT ''
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "main"."example_table_name" ON "example_table" (name);`);
         });
     });
 });
