@@ -373,7 +373,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS "main"."example_table_name" ON "example_table"
         });
     });
 
-    describe('getFieldDef(), getTableDef() 2', () => {
+    describe('getTableDef()', () => {
         let table;
 
         before(() => {
@@ -384,6 +384,36 @@ CREATE UNIQUE INDEX IF NOT EXISTS "main"."example_table_name" ON "example_table"
                 male: ['boolean', {defaultValue: true}],
                 books: ['array', {defaultValue: []}],
                 json: ['object', {defaultValue: {}}],
+            }, {
+                pk: 'id',
+                uk: 'name',
+            });
+        });
+
+        it('should return table def', () => {
+            assert.strictEqual(table.getTableDef(), `CREATE TABLE IF NOT EXISTS "example_table" (
+  "id" INTEGER NOT NULL ON CONFLICT IGNORE PRIMARY KEY AUTOINCREMENT,
+  "name" TEXT NOT NULL COLLATE NOCASE ON CONFLICT IGNORE,
+  "age" INTEGER NOT NULL DEFAULT 0,
+  "male" INTEGER NOT NULL DEFAULT 1,
+  "books" TEXT NOT NULL DEFAULT '',
+  "json" TEXT NOT NULL DEFAULT ''
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "main"."example_table_name" ON "example_table" (name);`);
+        });
+    });
+
+    describe('getTableDef() 2', () => {
+        let table;
+
+        before(() => {
+            table = new Table(db, 'example_table', {
+                id: ['int', {onConflict: 'ignore'}],
+                name: ['string', {onConflict: 'ignore', collate: 'noCase'}],
+                age: ['int', 0],
+                male: ['boolean', true],
+                books: ['array', []],
+                json: ['object', {}],
             }, {
                 pk: 'id',
                 uk: 'name',
