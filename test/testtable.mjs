@@ -370,14 +370,28 @@ CREATE UNIQUE INDEX IF NOT EXISTS "main"."example_table_name" ON "example_table"
   "json" TEXT NOT NULL
 );
 CREATE UNIQUE INDEX IF NOT EXISTS "main"."example_table_name" ON "example_table" (name);`);
-            assert.strictEqual(table.getTableDef({
-                id: {onConflict: 'ignore'},
-                name: {onConflict: 'ignore', collate: 'noCase'},
-                age: {defaultValue: 0},
-                male: {defaultValue: true},
-                books: {defaultValue: []},
-                json: {defaultValue: {}},
-            }), `CREATE TABLE IF NOT EXISTS "example_table" (
+        });
+    });
+
+    describe('getFieldDef(), getTableDef() 2', () => {
+        let table;
+
+        before(() => {
+            table = new Table(db, 'example_table', {
+                id: ['int', {onConflict: 'ignore'}],
+                name: ['string', {onConflict: 'ignore', collate: 'noCase'}],
+                age: ['int', {defaultValue: 0}],
+                male: ['boolean', {defaultValue: true}],
+                books: ['array', {defaultValue: []}],
+                json: ['object', {defaultValue: {}}],
+            }, {
+                pk: 'id',
+                uk: 'name',
+            });
+        });
+
+        it('should return table def', () => {
+            assert.strictEqual(table.getTableDef(), `CREATE TABLE IF NOT EXISTS "example_table" (
   "id" INTEGER NOT NULL ON CONFLICT IGNORE PRIMARY KEY AUTOINCREMENT,
   "name" TEXT NOT NULL COLLATE NOCASE ON CONFLICT IGNORE,
   "age" INTEGER NOT NULL DEFAULT 0,
