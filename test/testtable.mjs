@@ -66,6 +66,8 @@ describe('Table', () => {
             assert.deepStrictEqual(exampleTable.fields, ['name', 'age', 'male', 'books', 'json']);
             assert.deepStrictEqual(exampleTable.pk, 'id');
             assert.deepStrictEqual(exampleTable.uk, 'name');
+            assert.deepStrictEqual(exampleTable.uniqueIndexes, {name: {name: {descending: false}}});
+            assert.deepStrictEqual(exampleTable.indexes, {});
         });
     });
 
@@ -324,14 +326,45 @@ describe('Table', () => {
             }, {
                 pk: 'id',
                 uk: 'name',
+                uniqueIndexes: [
+                    ['name', 'age', 'male'],
+                ],
+                indexes: [
+                    'male',
+                    {
+                        age: {descending: true}
+                    }
+                ],
+            });
+        });
+
+        it('should make indexes', () => {
+            assert.deepStrictEqual(table.uniqueIndexes, {
+                name: {name: {descending: false}},
+                name_age_male: {
+                    name: {descending: false},
+                    age: {descending: false},
+                    male: {descending: false},
+                },
+            });
+            assert.deepStrictEqual(table.indexes, {
+                male: {male: {descending: false}},
+                age: {age: {descending: true}}
             });
         });
 
         it('should return field def', () => {
             assert.deepStrictEqual(table.getPkFieldDef(), '"id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT');
             assert.deepStrictEqual(table.getPkFieldDef({autoIncrement: false}), '"id" INTEGER NOT NULL PRIMARY KEY');
-            assert.deepStrictEqual(table.getPkFieldDef({collate: 'BINARY', autoIncrement: false}), '"id" INTEGER NOT NULL PRIMARY KEY');
-            assert.deepStrictEqual(table.getPkFieldDef({collate: 'BINARY', onConflict: 'ignore', autoIncrement: false}), '"id" INTEGER NOT NULL ON CONFLICT IGNORE PRIMARY KEY');
+            assert.deepStrictEqual(table.getPkFieldDef({
+                collate: 'BINARY',
+                autoIncrement: false
+            }), '"id" INTEGER NOT NULL PRIMARY KEY');
+            assert.deepStrictEqual(table.getPkFieldDef({
+                collate: 'BINARY',
+                onConflict: 'ignore',
+                autoIncrement: false
+            }), '"id" INTEGER NOT NULL ON CONFLICT IGNORE PRIMARY KEY');
             assert.deepStrictEqual(table.getUkFieldDef(), '"name" TEXT NOT NULL');
             assert.deepStrictEqual(table.getUkFieldDef({collate: 'binary'}), '"name" TEXT NOT NULL COLLATE BINARY');
             assert.deepStrictEqual(table.getUkFieldDef({onConflict: 'ignore'}), '"name" TEXT NOT NULL ON CONFLICT IGNORE');
@@ -348,7 +381,13 @@ describe('Table', () => {
             assert.deepStrictEqual(table.getFieldDef('books', {defaultValue: ['a', 'b', 'c']}), `"books" TEXT NOT NULL DEFAULT '["a","b","c"]'`);
             assert.deepStrictEqual(table.getFieldDef('json'), `"json" TEXT NOT NULL`);
             assert.deepStrictEqual(table.getFieldDef('json', {defaultValue: {}}), `"json" TEXT NOT NULL DEFAULT ''`);
-            assert.deepStrictEqual(table.getFieldDef('json', {defaultValue: {a: 1, b: 2, c: 3}}), `"json" TEXT NOT NULL DEFAULT '{"a":1,"b":2,"c":3}'`);
+            assert.deepStrictEqual(table.getFieldDef('json', {
+                defaultValue: {
+                    a: 1,
+                    b: 2,
+                    c: 3
+                }
+            }), `"json" TEXT NOT NULL DEFAULT '{"a":1,"b":2,"c":3}'`);
         });
 
         it('should return table def', () => {
@@ -360,16 +399,24 @@ describe('Table', () => {
   "books" TEXT NOT NULL,
   "json" TEXT NOT NULL
 );
-CREATE UNIQUE INDEX IF NOT EXISTS "main"."example_table_name" ON "example_table" (name);`);
-            assert.strictEqual(table.getCreateTableSql(), `CREATE TABLE IF NOT EXISTS "example_table" (
-  "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-  "name" TEXT NOT NULL,
-  "age" INTEGER NOT NULL,
-  "male" INTEGER NOT NULL,
-  "books" TEXT NOT NULL,
-  "json" TEXT NOT NULL
+CREATE UNIQUE INDEX IF NOT EXISTS "main"."example_table_name"
+ON "example_table" (
+  name ASC
 );
-CREATE UNIQUE INDEX IF NOT EXISTS "main"."example_table_name" ON "example_table" (name);`);
+CREATE UNIQUE INDEX IF NOT EXISTS "main"."example_table_name_age_male"
+ON "example_table" (
+  name ASC,
+  age ASC,
+  male ASC
+);
+CREATE INDEX IF NOT EXISTS "main"."example_table_male"
+ON "example_table" (
+  male ASC
+);
+CREATE INDEX IF NOT EXISTS "main"."example_table_age"
+ON "example_table" (
+  age DESC
+);`);
         });
     });
 
@@ -399,7 +446,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS "main"."example_table_name" ON "example_table"
   "books" TEXT NOT NULL DEFAULT '',
   "json" TEXT NOT NULL DEFAULT ''
 );
-CREATE UNIQUE INDEX IF NOT EXISTS "main"."example_table_name" ON "example_table" (name);`);
+CREATE UNIQUE INDEX IF NOT EXISTS "main"."example_table_name"
+ON "example_table" (
+  name ASC
+);`);
         });
     });
 
@@ -429,7 +479,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS "main"."example_table_name" ON "example_table"
   "books" TEXT NOT NULL DEFAULT '',
   "json" TEXT NOT NULL DEFAULT ''
 );
-CREATE UNIQUE INDEX IF NOT EXISTS "main"."example_table_name" ON "example_table" (name);`);
+CREATE UNIQUE INDEX IF NOT EXISTS "main"."example_table_name"
+ON "example_table" (
+  name ASC
+);`);
         });
     });
 
