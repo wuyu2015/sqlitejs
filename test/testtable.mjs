@@ -305,9 +305,9 @@ describe('Table', () => {
     describe('Table.getTimeFieldTypes()', () => {
         it('should return time field types object', () => {
             assert.deepStrictEqual(Table.getTimeFieldTypes(), {
-                created_at: 'int',
-                updated_at: 'int',
-                deleted_at: 'int',
+                created_at: 'date',
+                updated_at: ['date', 0],
+                deleted_at: ['date', 0],
             });
         });
     });

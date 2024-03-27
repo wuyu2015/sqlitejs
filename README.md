@@ -106,7 +106,11 @@ Counts the number of rows in a table.
 - `commitInserts({chunkSize})`: Commits the suspended inserts in batches.
 - `select({fields, pk, uk, where, resultField})`: Selects a row on the table.
 - `selectByPk`: Retrieves a row from the table based on the provided primary key value.
+- `selectUkByPk`: Retrieves the unique key from the table based on the provided primary key value.
+- `selectKByPk`: Retrieves the content field from the table based on the provided primary key value.
 - `selectByUk`: Retrieves a row from the table based on the provided unique key value.
+- `selectPkByUk`: Retrieves the primary key from the table based on the provided unique key value.
+- `selectKByUk`: Retrieves the content field from the table based on the provided unique key value.
 - `selects({distinct, fields, where, order, descending, limit, page, resultType, resultKey, resultField, pkAsResultKey, ukAsResultKey})`: Selects rows on the table.
 - `selectsPk`: Retrieve the primary key values as an array.
 - `selectsUk`: Retrieve the unique key values as an array.
