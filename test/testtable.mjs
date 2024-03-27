@@ -436,215 +436,64 @@ CREATE UNIQUE INDEX IF NOT EXISTS "main"."example_table_name" ON "example_table"
     describe('_getIndexes()', () => {
         it('should return indexes', () => {
             const fieldsSet = new Set(['a', 'b', 'c']);
-            assert.deepStrictEqual(Table._getIndexes([], fieldsSet), []);
+            assert.deepStrictEqual(Table._getIndexes([], fieldsSet), {});
             assert.deepStrictEqual(Table._getIndexes([
                 'a'
-            ], fieldsSet), [
-                {
-                    fields: [{
-                        field: 'a',
-                        descending: false,
-                    }],
-                    unique: false,
-                },
-            ]);
+            ], fieldsSet), {
+                a: {a: {descending: false}},
+            });
             assert.deepStrictEqual(Table._getIndexes([
                 ['a']
-            ], fieldsSet), [
-                {
-                    fields: [{
-                        field: 'a',
-                        descending: false,
-                    }],
-                    unique: false,
-                },
-            ]);
-            assert.deepStrictEqual(Table._getIndexes([
-                {
-                    fields: [{
-                        field: 'a',
-                        descending: false,
-                    }],
-                    unique: false,
-                }
-            ], fieldsSet), [
-                {
-                    fields: [{
-                        field: 'a',
-                        descending: false,
-                    }],
-                    unique: false,
-                },
-            ]);
-            assert.deepStrictEqual(Table._getIndexes([
-                {
-                    fields: [{
-                        field: 'a',
-                        descending: true,
-                    }],
-                    unique: true,
-                }
-            ], fieldsSet), [
-                {
-                    fields: [{
-                        field: 'a',
-                        descending: true,
-                    }],
-                    unique: true,
-                },
-            ]);
-            assert.deepStrictEqual(Table._getIndexes([
-                {
-                    fields: [{
-                        field: 'a',
-                    }],
-                }
-            ], fieldsSet), [
-                {
-                    fields: [{
-                        field: 'a',
-                        descending: false,
-                    }],
-                    unique: false,
-                },
-            ]);
+            ], fieldsSet), {
+                a: {a: {descending: false}},
+            });
             assert.deepStrictEqual(Table._getIndexes([
                 'a', 'b', 'c'
-            ], fieldsSet), [
-                {
-                    fields: [{
-                        field: 'a',
-                        descending: false,
-                    }],
-                    unique: false,
-                },
-                {
-                    fields: [{
-                        field: 'b',
-                        descending: false,
-                    }],
-                    unique: false,
-                },
-                {
-                    fields: [{
-                        field: 'c',
-                        descending: false,
-                    }],
-                    unique: false,
-                },
-            ]);
+            ], fieldsSet), {
+                a: {a: {descending: false}},
+                b: {b: {descending: false}},
+                c: {c: {descending: false}},
+            });
             assert.deepStrictEqual(Table._getIndexes([
                 ['a', 'b', 'c']
-            ], fieldsSet), [
-                {
-                    fields: [
-                        {
-                            field: 'a',
-                            descending: false,
-                        },
-                        {
-                            field: 'b',
-                            descending: false,
-                        },
-                        {
-                            field: 'c',
-                            descending: false,
-                        },
-                    ],
-                    unique: false,
+            ], fieldsSet), {
+                a_b_c: {
+                    a: {descending: false},
+                    b: {descending: false},
+                    c: {descending: false},
                 },
-            ]);
+            });
             assert.deepStrictEqual(Table._getIndexes([
-                ['a'], 'b', 'c'
-            ], fieldsSet), [
-                {
-                    fields: [{
-                        field: 'a',
-                        descending: false,
-                    }],
-                    unique: false,
+                ['a', 'b'],
+                'c',
+            ], fieldsSet), {
+                a_b: {
+                    a: {descending: false},
+                    b: {descending: false},
                 },
-                {
-                    fields: [{
-                        field: 'b',
-                        descending: false,
-                    }],
-                    unique: false,
+                c: {c: {descending: false}},
+            });
+            assert.deepStrictEqual(Table._getIndexes([{
+                a: {descending: false},
+            }], fieldsSet), {
+                a: {a: {descending: false}},
+            });
+            assert.deepStrictEqual(Table._getIndexes([{
+                a: {descending: true},
+            }], fieldsSet), {
+                a: {a: {descending: true}},
+            });
+            assert.deepStrictEqual(Table._getIndexes([{
+                a: {descending: true},
+                b: {descending: false},
+                c: {descending: true},
+            }], fieldsSet), {
+                a_b_c: {
+                    a: {descending: true},
+                    b: {descending: false},
+                    c: {descending: true},
                 },
-                {
-                    fields: [{
-                        field: 'c',
-                        descending: false,
-                    }],
-                    unique: false,
-                },
-            ]);
-            assert.deepStrictEqual(Table._getIndexes([
-                ['a', 'b'], 'c'
-            ], fieldsSet), [
-                {
-                    fields: [{
-                        field: 'a',
-                        descending: false,
-                    }, {
-                        field: 'b',
-                        descending: false,
-                    }],
-                    unique: false,
-                },
-                {
-                    fields: [{
-                        field: 'c',
-                        descending: false,
-                    }],
-                    unique: false,
-                },
-            ]);
-            assert.deepStrictEqual(Table._getIndexes([
-                {
-                    fields: 'a',
-                    unique: true,
-                }, 'c'
-            ], fieldsSet), [
-                {
-                    fields: [{
-                        field: 'a',
-                        descending: false,
-                    }],
-                    unique: true,
-                },
-                {
-                    fields: [{
-                        field: 'c',
-                        descending: false,
-                    }],
-                    unique: false,
-                },
-            ]);
-            assert.deepStrictEqual(Table._getIndexes([
-                {
-                    fields: ['a', 'b'],
-                    unique: true,
-                }, 'c'
-            ], fieldsSet), [
-                {
-                    fields: [{
-                        field: 'a',
-                        descending: false,
-                    }, {
-                        field: 'b',
-                        descending: false,
-                    }],
-                    unique: true,
-                },
-                {
-                    fields: [{
-                        field: 'c',
-                        descending: false,
-                    }],
-                    unique: false,
-                },
-            ]);
+            });
         });
     });
 });
